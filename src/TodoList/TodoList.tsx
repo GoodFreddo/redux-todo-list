@@ -1,5 +1,5 @@
-import React, { FC, useCallback } from "react";
-import { TodoListItem } from "./TodoListItem";
+import React, { FC } from "react";
+import TodoListItem from "./TodoListItem";
 import "./TodoList.css";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 

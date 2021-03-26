@@ -1,4 +1,4 @@
-export interface TodoListItem {
+export default interface TodoListItem {
   title: string;
   text: string;
   order: number;
