@@ -1,17 +1,25 @@
-import React, { FC, useState } from "react";
+import React, { Dispatch, FC, useState } from "react";
 import { TodoList } from "./TodoList/TodoList";
 import "./App.css";
 import TodoListItem from "./TodoList/TodoListItem";
-import { configureStore } from "@reduxjs/toolkit";
 import {
+  ApplicationState,
   createAddTodoAction,
   createRemoveTodoAction,
-  todoListReducer,
+  toDoList,
+  TodoListState,
 } from "./state/TodoListReducer";
+import { connect } from "react-redux";
 
-const todoListStore = configureStore({ reducer: todoListReducer });
+const mapStateToProps = (state: ApplicationState) => {
+  return { todoListItems: state.toDoList.todoListItems };
+};
 
-export const App: FC = () => {
+const App: FC<{
+  todoListItems: TodoListItem[];
+  addTodo: (title: string, text: string) => void;
+  removeTodo: () => void;
+}> = ({ todoListItems, addTodo, removeTodo }) => {
   const [title, setTitle] = useState("");
   const [itemText, setItemText] = useState("");
 
@@ -21,8 +29,7 @@ export const App: FC = () => {
       <p>
         <button
           onClick={() => {
-            todoListStore.dispatch(createAddTodoAction(title, itemText));
-            console.log(todoListStore.getState().todoListItems);
+            addTodo(title, itemText);
           }}
         >
           Add an item
@@ -38,18 +45,18 @@ export const App: FC = () => {
           onChange={(event) => setItemText(event.currentTarget.value)}
         ></textarea>
       </p>
-      <button
-        onClick={() => {
-          todoListStore.dispatch(createRemoveTodoAction());
-          console.log(todoListStore.getState().todoListItems);
-        }}
-      >
-        Remove an item
-      </button>
+      <button onClick={removeTodo}>Remove an item</button>
       <span className="ThirdColumn">
-        <TodoList todoListItems={todoListStore.getState().todoListItems} />
+        <TodoList todoListItems={todoListItems} />
       </span>
       <span className="ThirdColumn" />
     </span>
   );
 };
+
+const ConnectedApp = connect(mapStateToProps, {
+  addTodo: createAddTodoAction,
+  removeTodo: createRemoveTodoAction,
+})(App);
+
+export default ConnectedApp;
