@@ -1,13 +1,47 @@
 import TodoListItem from "../TodoList/TodoListItem";
-import {createStore, combineReducers, Store} from 'redux'
-
-export interface ApplicationState {
-    toDoList: TodoListState;
-}
+import { createStore, combineReducers, Store, Middleware } from "redux";
+import { applyMiddleware } from "redux";
+import thunk from "redux-thunk";
 
 export interface TodoListState {
   todoListItems: TodoListItem[];
 }
+
+type AddTodoItem = { type: "todo/AddTodoItem"; payload: TodoListItem };
+type RemoveTodoItem = { type: "todo/RemoveTodoItem" };
+type WipeTodoItems = { type: "todo/WipeTodoItems" };
+type PromiseGetTodo = { type: "todo/GetTodoItems"; payload: Promise<Function> };
+
+export const createAddTodoAction = (
+  title: string,
+  itemText: string
+): AddTodoItem => {
+  return {
+    type: "todo/AddTodoItem",
+    payload: { title: title, text: itemText },
+  };
+};
+export const createRemoveTodoAction = (): RemoveTodoItem => {
+  return { type: "todo/RemoveTodoItem" };
+};
+
+export const createWipeTodoAction = (): WipeTodoItems => {
+  return { type: "todo/WipeTodoItems" };
+};
+
+// export const createFetchTodoAction = ():PromiseGetTodo=>
+// {
+//   return{ type: 'todo/GetTodoItems',payload:{promise:
+//     fetch("http://localhost:62032/api/TodoList")
+//       .then((response) => response.json())
+//       .then((response) => {
+//         return response as TodoListItem[];
+//       })
+//       .then(//do thunking here);
+//   }}
+// }
+
+type ToDoAction = AddTodoItem | RemoveTodoItem | WipeTodoItems;
 
 const intialTodoListState: TodoListState = {
   todoListItems: [
@@ -17,28 +51,12 @@ const intialTodoListState: TodoListState = {
   ],
 };
 
-export const createAddTodoAction = (title: string, itemText: string) : AddTodoItem => {
-  return {
-    type: "todo/AddTodoItem",
-    payload: { title: title, text: itemText },
-  };
-};
-export const createRemoveTodoAction = () : RemoveTodoItem => {
-  return { type: "todo/RemoveTodoItem" };
-};
-
-type AddTodoItem = { type: 'todo/AddTodoItem', payload: TodoListItem};
-type RemoveTodoItem = { type: 'todo/RemoveTodoItem'}
-
-type ToDoAction = AddTodoItem | RemoveTodoItem
-
-export function toDoList(
+export function toDoListReducer(
   reducerState = intialTodoListState,
   action: ToDoAction
 ): TodoListState {
   switch (action.type) {
     case "todo/AddTodoItem": {
-      console.log("Adding");
       return {
         ...reducerState,
         todoListItems: [action.payload, ...reducerState.todoListItems],
@@ -50,10 +68,10 @@ export function toDoList(
         todoListItems: [...reducerState.todoListItems.slice(1)],
       };
     }
+    case "todo/WipeTodoItems": {
+      return { ...reducerState, todoListItems: [] };
+    }
     default:
       return reducerState;
   }
 }
-
-export const rootReducer = combineReducers<ApplicationState>({toDoList});
-export const applicationState = createStore(rootReducer);

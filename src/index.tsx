@@ -4,8 +4,9 @@ import "./index.css";
 
 import * as serviceWorker from "./serviceWorker";
 import { Provider } from "react-redux";
-import { applicationState } from "./state/TodoListReducer";
+
 import ConnectedApp from "./App";
+import { applicationState } from "./state/AppStore";
 
 ReactDOM.render(
   <React.StrictMode>

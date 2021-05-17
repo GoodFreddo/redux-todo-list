@@ -3,23 +3,25 @@ import { TodoList } from "./TodoList/TodoList";
 import "./App.css";
 import TodoListItem from "./TodoList/TodoListItem";
 import {
-  ApplicationState,
   createAddTodoAction,
   createRemoveTodoAction,
-  toDoList,
+  createWipeTodoAction,
+  toDoListReducer,
   TodoListState,
 } from "./state/TodoListReducer";
 import { connect } from "react-redux";
+import { ApplicationState } from "./state/AppStore";
 
 const mapStateToProps = (state: ApplicationState) => {
-  return { todoListItems: state.toDoList.todoListItems };
+  return { todoListItems: state.toDoListReducer.todoListItems };
 };
 
 const App: FC<{
   todoListItems: TodoListItem[];
   addTodo: (title: string, text: string) => void;
   removeTodo: () => void;
-}> = ({ todoListItems, addTodo, removeTodo }) => {
+  wipeTodos: () => void;
+}> = ({ todoListItems, addTodo, removeTodo, wipeTodos }) => {
   const [title, setTitle] = useState("");
   const [itemText, setItemText] = useState("");
 
@@ -46,6 +48,7 @@ const App: FC<{
         ></textarea>
       </p>
       <button onClick={removeTodo}>Remove an item</button>
+      <button onClick={wipeTodos}>Remove everything</button>
       <span className="ThirdColumn">
         <TodoList todoListItems={todoListItems} />
       </span>
@@ -57,6 +60,7 @@ const App: FC<{
 const ConnectedApp = connect(mapStateToProps, {
   addTodo: createAddTodoAction,
   removeTodo: createRemoveTodoAction,
+  wipeTodos: createWipeTodoAction,
 })(App);
 
 export default ConnectedApp;
