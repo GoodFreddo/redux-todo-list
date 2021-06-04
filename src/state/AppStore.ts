@@ -1,9 +1,7 @@
-import TodoListItem from "../TodoList/TodoListItem";
-import { createStore, combineReducers, Store, Middleware } from "redux";
-import { applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import { TodoListState, toDoListReducer } from "./TodoListReducer";
+import { applyMiddleware, combineReducers, createStore } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
+import thunk from "redux-thunk";
+import { toDoListReducer, TodoListState } from "./TodoListReducer";
 
 export interface ApplicationState {
   toDoListReducer: TodoListState;

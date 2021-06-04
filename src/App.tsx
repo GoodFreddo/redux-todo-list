@@ -1,27 +1,42 @@
-import React, { Dispatch, FC, useState } from "react";
-import { TodoList } from "./TodoList/TodoList";
+import React, { FC, useState } from "react";
+import { connect } from "react-redux";
 import "./App.css";
-import TodoListItem from "./TodoList/TodoListItem";
+import { ApplicationState } from "./state/AppStore";
 import {
-  createAddTodoAction,
+  createAddTodoToServerAction,
+  createLoadTodosFromServerAction,
   createRemoveTodoAction,
   createWipeTodoAction,
-  toDoListReducer,
-  TodoListState,
-} from "./state/TodoListReducer";
-import { connect } from "react-redux";
-import { ApplicationState } from "./state/AppStore";
+  todoListActions as TodoListActions,
+} from "./state/TodoListActions";
+import { TodoListState } from "./state/TodoListReducer";
+import { TodoList } from "./TodoList/TodoList";
 
 const mapStateToProps = (state: ApplicationState) => {
-  return { todoListItems: state.toDoListReducer.todoListItems };
+  return {
+    ...state.toDoListReducer,
+  };
 };
 
-const App: FC<{
-  todoListItems: TodoListItem[];
-  addTodo: (title: string, text: string) => void;
-  removeTodo: () => void;
-  wipeTodos: () => void;
-}> = ({ todoListItems, addTodo, removeTodo, wipeTodos }) => {
+const mapDispatchToProps = () => {
+  return {
+    saveTodoToServer: createAddTodoToServerAction,
+    removeTodo: createRemoveTodoAction,
+    wipeTodos: createWipeTodoAction,
+    loadTodosFromServer: createLoadTodosFromServerAction,
+  };
+};
+
+type props = TodoListState & TodoListActions;
+
+const App: FC<props> = ({
+  saveTodoToServer,
+  removeTodo,
+  wipeTodos,
+  loadTodosFromServer,
+  isAdding,
+  ...props
+}) => {
   const [title, setTitle] = useState("");
   const [itemText, setItemText] = useState("");
 
@@ -30,8 +45,9 @@ const App: FC<{
       <span className="ThirdColumn" />
       <p>
         <button
+          disabled={isAdding}
           onClick={() => {
-            addTodo(title, itemText);
+            saveTodoToServer({ title, text: itemText });
           }}
         >
           Add an item
@@ -47,20 +63,17 @@ const App: FC<{
           onChange={(event) => setItemText(event.currentTarget.value)}
         ></textarea>
       </p>
+      <button onClick={loadTodosFromServer}>Load todos from the server</button>
       <button onClick={removeTodo}>Remove an item</button>
       <button onClick={wipeTodos}>Remove everything</button>
       <span className="ThirdColumn">
-        <TodoList todoListItems={todoListItems} />
+        <TodoList {...{ isAdding, ...props }} />
       </span>
       <span className="ThirdColumn" />
     </span>
   );
 };
 
-const ConnectedApp = connect(mapStateToProps, {
-  addTodo: createAddTodoAction,
-  removeTodo: createRemoveTodoAction,
-  wipeTodos: createWipeTodoAction,
-})(App);
+const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
 
 export default ConnectedApp;

@@ -1,54 +1,38 @@
 import TodoListItem from "../TodoList/TodoListItem";
-import { createStore, combineReducers, Store, Middleware } from "redux";
-import { applyMiddleware } from "redux";
-import thunk from "redux-thunk";
 
 export interface TodoListState {
   todoListItems: TodoListItem[];
+  isLoading: boolean;
+  isAdding: boolean;
 }
 
-type AddTodoItem = { type: "todo/AddTodoItem"; payload: TodoListItem };
-type RemoveTodoItem = { type: "todo/RemoveTodoItem" };
-type WipeTodoItems = { type: "todo/WipeTodoItems" };
-type PromiseGetTodo = { type: "todo/GetTodoItems"; payload: Promise<Function> };
-
-export const createAddTodoAction = (
-  title: string,
-  itemText: string
-): AddTodoItem => {
-  return {
-    type: "todo/AddTodoItem",
-    payload: { title: title, text: itemText },
-  };
+export type AddTodoItem = { type: "todo/AddTodoItem"; payload: TodoListItem };
+export type LoadTodoItemsCompleted = {
+  type: "todo/LoadTodoItemsCompleted";
+  payload: TodoListItem[];
 };
-export const createRemoveTodoAction = (): RemoveTodoItem => {
-  return { type: "todo/RemoveTodoItem" };
+export type LoadTodoItemsStarted = { type: "todo/LoadTodoItemsStarted" };
+export type RemoveTodoItem = { type: "todo/RemoveTodoItem" };
+export type WipeTodoItems = { type: "todo/WipeTodoItems" };
+export type SaveTodoItemStarted = { type: "todo/SaveTodoItemStarted" };
+export type SaveTodoItemCompleted = {
+  type: "todo/SaveTodoItemCompleted";
+  payload: TodoListItem[];
 };
 
-export const createWipeTodoAction = (): WipeTodoItems => {
-  return { type: "todo/WipeTodoItems" };
-};
-
-// export const createFetchTodoAction = ():PromiseGetTodo=>
-// {
-//   return{ type: 'todo/GetTodoItems',payload:{promise:
-//     fetch("http://localhost:62032/api/TodoList")
-//       .then((response) => response.json())
-//       .then((response) => {
-//         return response as TodoListItem[];
-//       })
-//       .then(//do thunking here);
-//   }}
-// }
-
-type ToDoAction = AddTodoItem | RemoveTodoItem | WipeTodoItems;
+export type ToDoAction =
+  | AddTodoItem
+  | LoadTodoItemsCompleted
+  | RemoveTodoItem
+  | WipeTodoItems
+  | LoadTodoItemsStarted
+  | SaveTodoItemStarted
+  | SaveTodoItemCompleted;
 
 const intialTodoListState: TodoListState = {
-  todoListItems: [
-    { title: "Dishes", text: "Do the dishes" },
-    { title: "Garbage", text: "Take out the trash" },
-    { title: "Pizza party", text: "Have a pizza party" },
-  ],
+  todoListItems: [],
+  isLoading: false,
+  isAdding: false,
 };
 
 export function toDoListReducer(
@@ -60,6 +44,28 @@ export function toDoListReducer(
       return {
         ...reducerState,
         todoListItems: [action.payload, ...reducerState.todoListItems],
+        isAdding: false,
+      };
+    }
+    case "todo/LoadTodoItemsStarted": {
+      return { ...reducerState, isLoading: true };
+    }
+    case "todo/LoadTodoItemsCompleted": {
+      return {
+        ...reducerState,
+        todoListItems: action.payload,
+        isLoading: false,
+      };
+    }
+
+    case "todo/SaveTodoItemStarted": {
+      return { ...reducerState, isAdding: true };
+    }
+    case "todo/SaveTodoItemCompleted": {
+      return {
+        ...reducerState,
+        todoListItems: action.payload,
+        isAdding: false,
       };
     }
     case "todo/RemoveTodoItem": {

@@ -1,16 +1,16 @@
 import React, { FC } from "react";
-import TodoListItem from "./TodoListItem";
 import "./TodoList.css";
+import { TodoListState } from "../state/TodoListReducer";
 
-interface todoListProps {
-  todoListItems: TodoListItem[];
-}
+type todoListProps = TodoListState & {};
 
 export const TodoList: FC<todoListProps> = (props) => {
-  return (
+  return props.isLoading || props.isAdding ? (
+    <>Loading...</>
+  ) : (
     <ul>
       {props.todoListItems.map((todoListItem, index) => (
-        <li className="Box Draggable Padded">
+        <li id={index + ""} key={index} className="Box Draggable Padded">
           <span>
             {index + 1}: {todoListItem.title}
           </span>
